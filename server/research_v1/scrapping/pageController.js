@@ -1,8 +1,8 @@
 import pageScraper from "./pageScraper.js";
 // import db from "../db/DBcon.js";
-const scrapeAll =async function (browserInstance){
-	let browser;
-	const keyword =[
+
+class Scrapcontroller {
+    static keyword =[
         "Akara Prayote",
         "Luepol Pipanmekaporn",
         "Tanapat Anusasamornkul",
@@ -26,17 +26,29 @@ const scrapeAll =async function (browserInstance){
         "Nattagit Jiteurtragool",
         "Apisit Rattanatranurak"
     ];
-	try{
-		browser = await browserInstance;
-		await pageScraper.scrapScholar1(browser,keyword[0] );
-
-		
-		await pageScraper.scrapScopus(browser, keyword[0]);
-		await browser.close();
-	}
-	catch(err){
-		console.log("Could not resolve the browser instance => ", err);
-	}
+    static scrapeScholar = async function (browserInstance , keyword){
+        let browser;
+        try{
+            browser = await browserInstance;
+            await pageScraper.scrapScholar1(browser,keyword );
+            // await browser.close();
+        }
+        catch(err){
+            console.log("Could not resolve the browser instance => ", err);
+        }
+    }
+    static scrapeScopus = async function (browserInstance , keyword){
+        let browser;
+        try{
+            browser = await browserInstance;
+            await pageScraper.scrapScopus(browser,keyword);
+            // await browser.close();
+        }
+        catch(err){
+            console.log("Could not resolve the browser instance => ", err);
+        }
+    }
 }
+
 // export default (browserInstance) => scrapeAll(browserInstance)
-export default scrapeAll;
+export default Scrapcontroller;
