@@ -3,30 +3,7 @@ import db from "../db/DBcon.js";
 
 
 const scraperObject = {
-    keyword :[
-        "Akara Prayote",
-        "Luepol Pipanmekaporn",
-        "Tanapat Anusasamornkul",
-        "Prachyaporn Liangsutthisakon",
-        "Suwatchai Kamonsantiroj",
-        "Khantharat Anekboon",
-        "Nikorn Sutthisangiam",
-        "Nontakorn Sathitanon",
-        "Gridaphat Sriharee",
-        "Kobkiat Saraubon",
-        "Porawat Visutsak",
-        "Benchaphon Limthanmaphon",
-        "Chiabwoot Ratanavilisagul",
-        "Sathit Prasomphan",
-        "Earn Suriyachay",
-        "Nuttawut Sroidokson",
-        "Anusorn Wongsanit",
-        "Yonchanok khaokaew",
-        "San Ratanasanya",
-        "Thattapon Surasak",
-        "Nattagit Jiteurtragool",
-        "Apisit Rattanatranurak"
-    ],
+
 	url: ['https://scholar.google.com/','https://www.scopus.com/search/form.uri?zone=TopNavBar&origin=AuthorProfile&display=basic#author'],
 	async scrapScholar1(browser,keyword){
         let dataresearch=[];
