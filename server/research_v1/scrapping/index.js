@@ -1,11 +1,29 @@
 import browserObject from "./browser.js";
-import scrapeAll from "./pageController.js";
-// import db from "../db/DBcon.js";
+import Scrapcontroller from "./pageController.js";
+import cron from 'node-cron';
 
-let browserInstance = browserObject.startBrowser();
+const AutoScrap = {
+    async setTime(){
+        let i=0;
+        const keyword = Scrapcontroller.keyword;
+        console.log("Time counting.....");
+        cron.schedule("0 0 */15 * *",()=>{
+            cron.schedule("*/2 * * * *",()=>{
+                if(i < keyword.length){
+                    let browserInstance = browserObject.startBrowser();
+                    Scrapcontroller.scrapeScholar(browserInstance, keyword[i]);
+                    Scrapcontroller.scrapeScopus(browserInstance, keyword[i]);
+                    i++;
+                    browserInstance.close();
+                }
+            });
+            i=0;
+        });
+    }
+}
 
-// Pass the browser instance to the scraper controller
+
+export default AutoScrap;
 
 
-scrapeAll(browserInstance);
 

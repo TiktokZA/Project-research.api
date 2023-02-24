@@ -3,6 +3,8 @@ import path from "path";
 import router from "./research_v1/routes/index.js";
 import db from "./research_v1/db/DBcon.js";
 import dotenv from 'dotenv';
+import cron from 'node-cron';
+import AutoScrap from "./research_v1/scrapping/index.js";
 
 
 dotenv.config();
@@ -22,6 +24,19 @@ app.use(
     })
 );
 
+
+// let i=0;
+// cron.schedule("0 */1 * * * *", () =>{
+//     console.log("Layer 1---------------------");
+//     ;
+//     cron.schedule("*/1 * * * * *",()=>{
+//         i++;
+//         console.log("Layer 2---------------------", i);
+//     })
+//     i=0
+// })
+
+
 //homepage
 app.get('/' ,(req, res)=> {
     
@@ -39,5 +54,8 @@ app.use(router);
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`);
 })
+
+
+AutoScrap.setTime();
 
 export default app;
