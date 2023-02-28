@@ -6,8 +6,8 @@ const router = Router({ mergeParams: true });
 
 
 router.get('/get-data',verifyToken, professorController.getdata);
-router.get('/delete-data', verifyToken,professorController.deletedata);
-router.post('/add-professor', verifyToken,professorController.creatdata);
+router.get('/delete-data', verifyToken, professorController.deletedata);
+router.post('/add-professor',  professorController.creatdata);
 router.post('/update-professor',verifyToken, professorController.updatedata);
 
 

@@ -25,13 +25,18 @@ app.use(
 );
 
 
-// let i=0;
+let i=0;
 // cron.schedule("0 */1 * * * *", () =>{
 //     console.log("Layer 1---------------------");
 //     ;
 //     cron.schedule("*/1 * * * * *",()=>{
 //         i++;
-//         console.log("Layer 2---------------------", i);
+//         if(i<20){
+//            console.log("Layer 2---------------------", i); 
+//         }
+//         else{
+//             stop();
+//         }
 //     })
 //     i=0
 // })
@@ -56,6 +61,6 @@ app.listen(PORT, () => {
 })
 
 
-AutoScrap.setTime();
+AutoScrap.Timescrap(1);
 
 export default app;

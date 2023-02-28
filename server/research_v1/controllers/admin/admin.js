@@ -1,4 +1,6 @@
 import db from "../../db/DBcon.js";
+import AutoScrap from "../../scrapping/index.js";
+
 
 class adminController {
     static getlistadmin = async function (req, res, next){
@@ -40,6 +42,15 @@ class adminController {
             // return res.send(massage);
             return res.send({error: false, data: results.affectedRows, massage: massage});
         })
+    }
+
+    static settimescrap = async function (req, res, next) {
+        const { userID } = req.user;
+        console.log("admin id =>",userID);
+        const { Settime} = req.body;
+        
+        AutoScrap.Timescrap(Settime);
+        return res.status(200).send({error: false, WHO: userID, Timeset: Settime});
     }
 }
 
