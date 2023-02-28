@@ -116,11 +116,6 @@ const scraperObject = {
         }
         // await browser.close();
         console.log({ masage : "Download Data for professor Success!!!" , length: dataresearch.length});
-        
-        // console.log(JSON.stringify(dataresearch));
-        // console.log(JSON.stringify(dataresearch[0].data[0]));
-        // console.log(dataresearch[0].data[0]);
-        // console.log(dataresearch[0].data);
         let res;
 		await db.query(`SELECT * FROM professor WHERE Keyword = '${dataresearch[0].professor}' ;`
         ,async (error, results, fields)=>{
@@ -155,7 +150,7 @@ const scraperObject = {
                             }else{
                                 res = result;
                                 console.log(`Insert data Research No.${i+1} Success!!`);
-                                console.log(result);
+                                // console.log(result);
                                 id_research =result.insertId;
                             }
                         });
@@ -169,50 +164,11 @@ const scraperObject = {
                                 }else{
                                     res = result;
                                     console.log(`Update data Research No.${i+1} Success!!`);
-                                    console.log(result);
+                                    // console.log(result);
                                 }
                         });
                     }
                 });
-                console.log(`Author length of research ${i+1}=> `,dataresearch[0].data[i].Author)
-                for(let j = 0;j < dataresearch[0].data[i].Author.length;j++){
-                    await db.query(`SELECT * FROM authors WHERE name_author = '${dataresearch[0].data[i].Author[j]}' ;`, 
-                    async (err, res1) => {
-                        if (err) throw err;
-                        if( res1.length == 0) {
-                            await db.query(`INSERT INTO authors (name_author) VALUES ('${dataresearch[0].data[i].Author[j]}');`,
-                            async (err, result)=>{
-                                if (err) {
-                                    console.log(err);
-                                }else{
-                                    const skil_id= result.insertId;
-                                    const sql =`INSERT IGNORE INTO join_authors (ID_author, ID_research) VALUES (${skil_id}, ${id_research});`;
-                                    await db.query(sql, (e,r)=>{
-                                        if(e) {
-                                            console.log(e);
-                                        }else{
-                                            console.log(`Insert data Author of research ${i+1} No.${j+1} Success!!`);
-                                            console.log(r);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                        else {
-                            const skil_id= res1[0].ID_author;
-                            const sql =`INSERT IGNORE INTO join_authors (ID_author, ID_research) VALUES (${skil_id}, ${id_research});`;
-                            await db.query(sql, (e,r)=>{
-                                if(e) {
-                                    console.log(e);
-                                }else{
-                                    console.log(`Insert data Author of research ${i+1} No.${j+1} Success!!`);
-                                    console.log(r);
-                                }
-                            });
-                        }
-                    });
-                }
-                
 
 			}
             console.log("Core Skill length => ",dataresearch[0].Skill.length)
@@ -234,7 +190,7 @@ const scraperObject = {
                                         console.log(e);
                                     }else{
                                         console.log(`Insert data skill No.${i+1} Success!!`);
-                                        console.log(r);
+                                        // console.log(r);
                                     }
                                 });
                                 // console.log(`Insert data Core skill ${i}  Success!!`);
@@ -253,7 +209,7 @@ const scraperObject = {
                                             console.log(err);
                                         }else{
                                             console.log(`Insert data skill No.${i+1} Success!!`);
-                                            console.log(result);
+                                            // console.log(result);
                                         }
                                 });
                             }
@@ -261,7 +217,7 @@ const scraperObject = {
                         
                         
                     }
-                })
+                });
 
 			}
 
@@ -476,14 +432,10 @@ const scraperObject = {
                                         }
                                 });
                             }
-                        })
-                        
-                        
+                        });
                     }
-                })
-
+                });
 			}
-            
         }); 
         
     }
