@@ -3,15 +3,22 @@ import path from "path";
 import router from "./research_v1/routes/index.js";
 import db from "./research_v1/db/DBcon.js";
 import dotenv from 'dotenv';
-import cron from 'node-cron';
-import AutoScrap from "./research_v1/scrapping/index.js";
 
+import AutoScrap from "./research_v1/scrapping/index.js";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
 
 const PORT = process.env.API_PORT || 4000 ;
 
+
+// app.use((req ,res ,next)=>{
+//     res.header('Access-Control-Allow-Origin', '*');
+//     res.header('Access-Control-Allow-Headers', 'Origin , X-Requested-With, Content-Type, Accept');
+//     next();
+
+// })
 app.use(
     express.json({
         limit: "50mb",
@@ -23,7 +30,7 @@ app.use(
         extended: true,
     })
 );
-
+app.use(cors())
 
 let i=0;
 // cron.schedule("0 */1 * * * *", () =>{
@@ -61,6 +68,6 @@ app.listen(PORT, () => {
 })
 
 
-AutoScrap.Timescrap(1);
+AutoScrap.Timescrap(4);
 
 export default app;

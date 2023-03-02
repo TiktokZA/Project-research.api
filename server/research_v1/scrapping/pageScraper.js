@@ -250,9 +250,9 @@ const scraperObject = {
             if(await page.waitForSelector('#pendo-guide-container')){
                 await page.click('button#pendo-close-guide-32945519._pendo-close-guide');
             }
-            await page.waitForTimeout(1000);
-            await page.waitForSelector('#documents-panel > div.stack_4eb725.verticalSpacer_4eb725 > div > div.col-18.article--results > div > els-results-layout > els-paginator > nav > els-select > div > label > select');
-            await page.select('#documents-panel > div.stack_4eb725.verticalSpacer_4eb725 > div > div.col-18.article--results > div > els-results-layout > els-paginator > nav > els-select > div > label > select', "200");
+            await page.waitForSelector('#documents-panel > div.stack_4b3eb8.verticalSpacer_4b3eb8 > div > div.col-18.article--results > div > els-results-layout > els-paginator > nav > els-select > div > label');
+            await page.select('els-results-layout > els-paginator > nav > els-select > div > label > select', "200");
+            await page.select('els-results-layout > els-paginator > nav > els-select > div > label > select', "200");
             await page.waitForTimeout(2000);
             let selector = '.collapsible-panel__button.button--link';
             await page.$$eval(selector, anchors => {
