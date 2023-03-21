@@ -4,7 +4,7 @@ import db from "../db/DBcon.js";
 
 const scraperObject = {
 
-	url: ['https://scholar.google.com/','https://www.scopus.com/search/form.uri?zone=TopNavBar&origin=AuthorProfile&display=basic#author'],
+	url: ['https://scholar.google.com/','https://www.scopus.com/search/form.uri?zone=TopNavBar&origin=AuthorProfile&display=basic#author','http://cs.kmutnb.ac.th/administrator.jsp'],
 	async scrapScholar1(browser,keyword){
         let dataresearch=[];
         let page = await browser.newPage();
@@ -73,15 +73,16 @@ const scraperObject = {
                         const elementsv = await document.querySelectorAll(".gsc_oci_value");
 
                         for(let i=0 ; i < elementsf.length; i++ ){ 
-                            if(await elementsf[i].textContent == "ผู้เขียน") author =await elementsv[i].textContent;
-                            if(await elementsf[i].textContent == "วันที่เผยแพร่") Publication_date =await elementsv[i].textContent;
-                            if(await elementsf[i].textContent == "การประชุม") Conference =await elementsv[i].textContent;
-                            if(await elementsf[i].textContent == "คำอธิบาย") Description =await elementsv[i].textContent;
-                            if(await elementsf[i].textContent == "ผู้เผยแพร่") type =await elementsv[i].textContent;
+                            if(await elementsf[i].textContent == "ผู้เขียน" || await elementsf[i].textContent == "Authors") author =await elementsv[i].textContent;
+                            if(await elementsf[i].textContent == "วันที่เผยแพร่" || await elementsf[i].textContent == "Publication date") Publication_date =await elementsv[i].textContent;
+                            if(await elementsf[i].textContent == "การประชุม" || await elementsf[i].textContent == "Conference") Conference = "Conference "+ await elementsv[i].textContent;
+                            if(await elementsf[i].textContent == "Journal" || await elementsf[i].textContent == "วารสารวิชาการ" ) Conference = "Journal "+ await elementsv[i].textContent;
+                            if(await elementsf[i].textContent == "คำอธิบาย" || await elementsf[i].textContent == "Description") Description =await elementsv[i].textContent;
+                            if(await elementsf[i].textContent == "ผู้เผยแพร่" || await elementsf[i].textContent == "Publisher") type =await elementsv[i].textContent;
                         }
                         Title =await document.querySelector("#gsc_oci_title > a").textContent;
                         article =await document.querySelector("#gsc_oci_title > a").href;
-                        author = author.split(", ");
+                        // author = author.split(", ");
                     } catch (error) {
                         console.log(`this data `+error);
                     }
@@ -136,7 +137,9 @@ const scraperObject = {
                     Publisher:dataresearch[0].data[i].Type,
                     ID_Type:1, 
                     Citation: dataresearch[0].data[i].Citation,
+                    authors:dataresearch[0].data[i].Author,
                     Date_Update:date_update,
+                    status : "valid"
                 }
                 await db.query(`SELECT * FROM research WHERE name_research = '${dataresearch[0].data[i].Title}' AND ID_Type = 1;`,
                 async (err, res) =>{
@@ -239,20 +242,21 @@ const scraperObject = {
         await page.keyboard.press('Enter');
         await page.waitForNavigation();
     
-        if(! await page.$('#resultDataRow1 > td.authorResultsNamesCol.col20 > a')){
+        if(! await page.$('#resultDataRow1 > td > a')){
             console.log({ masage : "Data for this Professor is not found..." , length: null});
             await dataresearch.push({ professor :keyword ,data :null,  Skill : null});
             await page.close();
         }else{
-            await page.click('#resultDataRow1 > td.authorResultsNamesCol.col20 > a');
+            await page.click('#resultDataRow1 > td > a');
             console.log("page loaded....");
-            // await page.waitForTimeout(1000);
-            if(await page.waitForSelector('#pendo-guide-container')){
+            await page.waitForTimeout(1000);
+            if( await page.$('#pendo-guide-container')){
+                await page.waitForSelector('#pendo-guide-container')
                 await page.click('button#pendo-close-guide-32945519._pendo-close-guide');
             }
-            await page.waitForSelector('#documents-panel > div.stack_4b3eb8.verticalSpacer_4b3eb8 > div > div.col-18.article--results > div > els-results-layout > els-paginator > nav > els-select > div > label');
+            await page.waitForSelector('#documents-panel > div > div > div:nth-child(2) > div > els-results-layout > els-paginator > nav > els-select > div > label');
             await page.select('els-results-layout > els-paginator > nav > els-select > div > label > select', "200");
-            await page.select('els-results-layout > els-paginator > nav > els-select > div > label > select', "200");
+            // await page.select('els-results-layout > els-paginator > nav > els-select > div > label > select', "200");
             await page.waitForTimeout(2000);
             let selector = '.collapsible-panel__button.button--link';
             await page.$$eval(selector, anchors => {
@@ -271,32 +275,32 @@ const scraperObject = {
                 try {
                      
                 const Title = await reviewElements[i].$eval(
-                    '.row > .col-19 > .list-title.margin-size-24-t.margin-size-0-b.text-width-32 > h4 > a > span',
+                    '.row > div:nth-child(1) > div > h4',
                     (v)=> v.textContent
                 );
                 const Link = await reviewElements[i].$eval(
-                    '.row > .col-19 > .list-title.margin-size-24-t.margin-size-0-b.text-width-32 > h4 > a',
+                    '.row > div:nth-child(1) > div > h4 > a',
                     (v)=> v.href
                 );
                 const Type = await reviewElements[i].$eval(
-                    '.row > .col-19 > span',
+                    '.row > div:nth-child(1) > span',
                     (v)=> v.textContent
                 );
                 let Year = await reviewElements[i].$eval(
-                    '.row > .col-19 > .text-meta.text-width-34 > span:nth-child(2)',
+                    '.row > div:nth-child(1) > .text-meta.text-width-34 > span:nth-child(2)',
                     (v)=> v.textContent
                 );
                 Year = Year.split(",");
                 const Conference = await reviewElements[i].$eval(
-                    'span.text-bold.text-italic.text-meta',
+                    '.row > div:nth-child(1) > div:nth-child(4) > span',
                     (v)=> v.textContent
                 );
                 const Abstact = await reviewElements[i].$eval(
-                    '.row > .col-19 > .hydrated > section',
+                    '.row > div:nth-child(1) > .hydrated > section',
                     (v)=> v.textContent
                 );
                 const Citation = await reviewElements[i].$eval(
-                    '.row > div.col-2.padding-size-24-t > div > div > div > div:nth-child(1)',
+                    '.row > div:nth-child(2) > div > div > div > div:nth-child(1)',
                     (v) => v.textContent
                 );
                 
@@ -318,10 +322,12 @@ const scraperObject = {
                 }
             }
 
-            await page.click("#scopus-author-profile-page-control-microui__general-information-content > section > div > ul > li:nth-child(5)");
-            await page.waitForSelector("#scopus-author-profile-page-control-microui__general-information-content > section > div > ul > li:nth-child(5) > div > div > div > div > div > div");
+
+           
+            await page.click("#AuthorHeader__showAllAuthorInfo");
+            await page.waitForSelector(`.background_cfa738 > div > div > div >div >div > div:nth-child(4) >div >span`);
             const data_skills =await page.evaluate( async () =>{
-                const elements = await document.querySelector("#scopus-author-profile-page-control-microui__general-information-content > section > div > ul > li:nth-child(5) > div > div > div > div > div > div > div:nth-child(4) > div > span").textContent;
+                const elements = await document.querySelector(`.background_cfa738 > div > div > div >div >div > div:nth-child(4) >div >span`).textContent;
                 const data =elements.split(" • ");
                 console.log("data skill =>", elements);
                 return data;
@@ -358,6 +364,7 @@ const scraperObject = {
                     ID_Type:2, 
                     Citation:dataresearch[0].data[i].Citation,
                     Date_Update:dateFormat,
+                    status : "valid"
                 }
                 await db.query(`SELECT * FROM research WHERE name_research = '${dataresearch[0].data[i].Title}' AND ID_Type = 2;`,
                 async (err, res) =>{
@@ -403,7 +410,7 @@ const scraperObject = {
                                 console.log(err);
                             }else{
                                 const skil_id= result.insertId;
-                                const sql =`INSERT IGNORE INTO skill (ID_coreskill, ID_professor) VALUES (${skil_id}, ${ID});`;
+                                const sql =`INSERT INTO skill (ID_coreskill, ID_professor) VALUES (${skil_id}, ${ID});`;
                                 await db.query(sql, (e,r)=>{
                                     if(e) {
                                         console.log(e);
@@ -421,7 +428,7 @@ const scraperObject = {
                         await db.query(`SELECT * FROM skill WHERE ID_coreskill= ${skil_id} AND ID_professor=  ${ID};`,async (e,r)=>{
                             if(e) throw e;
                             if(r.length == 0){
-                                const sql =`INSERT IGNORE INTO skill (ID_coreskill, ID_professor) VALUES (${skil_id}, ${ID});`;
+                                const sql =`INSERT INTO skill (ID_coreskill, ID_professor) VALUES (${skil_id}, ${ID});`;
                                 await db.query(sql,
                                 (err, result)=>{
                                         if (err) {
@@ -439,7 +446,76 @@ const scraperObject = {
         }); 
         
     }
+    ,async scrapCIS(browser){
+        let page = await browser.newPage();
+        console.log(`Navigating to ${this.url[2]}...`);
+        await page.goto(this.url[2]);
+        await page.waitForSelector('body > div.probootstrap-page-wrapper > section:nth-child(4) > div:nth-child(2) > div:nth-child(2) > div > figure > a');
+        const links =await page.evaluate( async () =>{
+            const links= [];
+                const elements = await document.querySelectorAll("body > div.probootstrap-page-wrapper > section:nth-child(4) > .row > div > div > .media > a");
+                for( let el of elements){ 
+                    const link = await el.href;
+                    console.log(link);
+                    links.push(link);
+                }
+            return links;
+        });
+        // const name_thai =await page.evaluate( async () =>{
+        //     const links= [];
+        //         const elements = await document.querySelectorAll("body > div.probootstrap-page-wrapper > section:nth-child(4) > .row > div > div > div > h3");
+        //         for( let el of elements){ 
+        //             const link = await el.href;
+        //             console.log(link);
+        //             links.push(link);
+        //         }
+        //     return links;
+        // });
+        console.log({ masage : "get link success",length: links.length})
+        let n=0;
+        const datalist =[];
+        for ( let link of links){
+            await page.goto(link)
+            const data = await page.evaluate( async () =>{
+                let qualification = [];
+                let Email ='';
+                try {
+                    const elementsv = await document.querySelectorAll("body > div.probootstrap-page-wrapper > section.probootstrap-section.probootstrap-section-sm > div > div >div > div >div > p");
+                    for(let i=1 ; i < elementsv.length; i++ ){ 
+                        if(elementsv[i].textContent == '') break;
+                        else{
+                            qualification.push(elementsv[i].textContent);
+                        }
+                    }
+                    Email = await document.querySelector("#probootstrap-sidebar > div.container > div > span:nth-child(2) > a").textContent;
+                } catch (error) {
+                    console.log(`this data `+error);
+                }
+                return {
+                    qualification : qualification,
+                    Email : Email
+                }
+            });
+            console.log(`Downloading data ${n+1}......`);
+            console.log(data);
+            datalist.push(data);
+            n++;
+        }
+        for(let i=0; i<links.length ;i++){
+            let strqry = `SELECT ID_professor FROM professor WHERE Email ='${datalist[i].Email}'`
+            await db.query(strqry , 
+            async (err, res) =>{
+                if (err) throw err;
+                console.log("5464",res[0].ID_professor)
+                if(res.length > 0 ){
+                    let idpro =res[0].ID_professor;
+                }
+            });    
+            
+        }
+        
 
+    }
     
 }
 

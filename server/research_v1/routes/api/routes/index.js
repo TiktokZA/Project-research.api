@@ -14,6 +14,6 @@ router.use('/admin', adminRoute);
 router.use('/auth', authRoute);
 router.use('/user', userRoute);
 router.use('/search', researchRoute);
-
+router.use('/research', researchRoute);
 
 export default router;

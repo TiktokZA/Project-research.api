@@ -34,7 +34,8 @@ class AuthController {
                 return res.status(200).send({
                     msg: 'Logged in!',
                     accessToken,
-                    user: results[0]
+                    user: results[0],
+                    Role:"Professor"
                 });
             }else{
                 return res.status(401).send({
@@ -67,7 +68,8 @@ class AuthController {
                 return res.status(200).send({
                     msg: 'Logged in!',
                     accessToken,
-                    user: results[0]
+                    user: results[0],
+                    Role : "Admin"
                 });
             }else{
                 return res.status(401).send({

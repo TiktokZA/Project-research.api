@@ -4,9 +4,11 @@ import { CronJob } from "cron";
 
 var job;
 var job1 ;
+var time ;
 const AutoScrap = {
     async Timescrap(indext){
         let i=0;
+        time = indext;
         const keyword = Scrapcontroller.keyword;
         
         
@@ -51,8 +53,6 @@ const AutoScrap = {
         job.start();
         console.log("update time job....");
 
-
-
         // let j=0;
         // let strtime1 = [
         //     "0 */1 * * * *",
@@ -84,16 +84,55 @@ const AutoScrap = {
         // console.log("update time job....")
     }
 }
+export function gettimescrap() {
+    let msg = "";
+    console.log("time => ",time)
+    // if(time == 0 )
+    switch (time) {
+        case 0:
+          msg ="At minute 0 past every 3rd hour."
+          break;
+        case 1:
+            msg ="At 00:00 on every day-of-month"
+
+          break;
+        case 2:
+            msg ="At 00:00 on every 3rd day-of-month"
+
+          break;
+        case 3:
+            msg ="At 00:00 on Sunday"
+
+          break;
+        case 4:
+            msg ="At 00:00 on every 15th day-of-month."
+
+          break;
+        case 5:
+            msg ="At 00:00 on day-of-month 1 in every month."
+
+            break;
+        case 6:
+            msg ="At 00:00 on day-of-month 1 in every 3rd month."
+
+            break;
+        default:
+          msg=""
+          break;
+    }
+    return msg;  
+}
 
 
 export default AutoScrap;
 
 // let browserInstance1 = browserObject.startBrowser();
-
+// let i=0;
 // const keyword = Scrapcontroller.keyword;
-// await Scrapcontroller.scrapeScholar(browserInstance1, keyword[0]);
+// await Scrapcontroller.scrapeScholar(browserInstance1, keyword[i]);
 // let browserInstance2 = browserObject.startBrowser();
-// await Scrapcontroller.scrapeScopus(browserInstance2, keyword[0]);
+// await Scrapcontroller.scrapeScopus(browserInstance2, keyword[i]);
 
-
+// let browserInstance2 = browserObject.startBrowser();
+// await Scrapcontroller.scrapeCIS(browserInstance2);
 
