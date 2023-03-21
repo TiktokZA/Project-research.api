@@ -28,13 +28,14 @@ class AuthController {
             if(password == results[0].Password){
                 const userID = results[0].ID_professor;
                 // console.log(userID);
-                const token = await authService.getToken({userID ,username: email, Role:"Professor"});
+                const accessToken = await authService.getToken({userID ,username: email, Role:"Professor"});
                 // console.log(token);
                 // res.status(200).send({ user, ...token });
                 return res.status(200).send({
                     msg: 'Logged in!',
-                    token,
-                    user: results[0]
+                    accessToken,
+                    user: results[0],
+                    Role:"Professor"
                 });
             }else{
                 return res.status(401).send({
@@ -61,13 +62,14 @@ class AuthController {
             if(password == results[0].password){
                 const userID = results[0].ID_admin;
                 // console.log(userID);
-                const token = await authService.getToken({userID ,username, Role : "Admin"});
+                const accessToken = await authService.getToken({userID ,username, Role : "Admin"});
                 // console.log(token);
                 // res.status(200).send({ user, ...token });
                 return res.status(200).send({
                     msg: 'Logged in!',
-                    token,
-                    user: results[0]
+                    accessToken,
+                    user: results[0],
+                    Role : "Admin"
                 });
             }else{
                 return res.status(401).send({
@@ -102,12 +104,12 @@ class AuthController {
                   }
                   if (bResult) {
                     const userID= results[0].ID_user;
-                    const token = await authService.getToken( {userID , username ,Role:"User" } );
+                    const accessToken = await authService.getToken( {userID , username ,Role:"User" } );
                     
                     return res.status(200).send({
                       msg: `You are logged in!`,
-                      token,
-                      user: results[0]
+                      accessToken,
+                      user: results[0],
                     });
                   }
                   return res.status(401).send({

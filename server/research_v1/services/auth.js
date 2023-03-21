@@ -4,8 +4,8 @@ import dotenv from 'dotenv';
 const { config } = dotenv;
 config();
 
-//const accessTokenExpiresIn = 60 * 30;
-const accessTokenExpiresIn = 10; // ss * mm * hh
+const accessTokenExpiresIn = 60 * 30 * 1;
+// const accessTokenExpiresIn = 10; // ss * mm * hh
 // const refreshTokenExpiresIn = 60 * 60 * 24 * 7; // ss * mm * hh * dd
 
 const authService ={};

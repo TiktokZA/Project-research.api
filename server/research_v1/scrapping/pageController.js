@@ -31,18 +31,31 @@ class Scrapcontroller {
         try{
             browser = await browserInstance;
             await pageScraper.scrapScholar1(browser,keyword );
-            // await browser.close();
+           
         }
         catch(err){
             console.log("Could not resolve the browser instance => ", err);
         }
+        await browser.close();
     }
     static scrapeScopus = async function (browserInstance , keyword){
         let browser;
         try{
             browser = await browserInstance;
             await pageScraper.scrapScopus(browser,keyword);
-            // await browser.close();
+            
+        }
+        catch(err){
+            console.log("Could not resolve the browser instance => ", err);
+        }
+        await browser.close();
+    }
+    static scrapeCIS = async function (browserInstance){
+        let browser;
+        try{
+            browser = await browserInstance;
+            await pageScraper.scrapCIS(browser);
+            await browser.close();
         }
         catch(err){
             console.log("Could not resolve the browser instance => ", err);

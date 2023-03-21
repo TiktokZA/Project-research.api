@@ -7,6 +7,10 @@ const { Router } = express;
 const router = Router({ mergeParams: true });
 
 router.get('/get-data', adminController.getlistadmin);
+router.post('/settime',verifyToken, adminController.settimescrap);
+router.get('/get-timescrap',verifyToken,adminController.gettimescrap)
+router.get('/get-databyid',verifyToken ,adminController.getdataadmin);
+
 
 router.post('/welcome' , verifyToken , (req,res)=> {
     res.status(200).send({Title :"welcome",data: req.user })
