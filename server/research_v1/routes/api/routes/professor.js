@@ -4,7 +4,7 @@ import verifyToken from "../../../middleware/auth.js";
 const { Router } = express;
 const router = Router({ mergeParams: true });
 
-
+router.post('/get-databyadmin',verifyToken, professorController.getdatabyadmin);
 router.get('/get-data',verifyToken, professorController.getdata);
 router.get('/delete-data', verifyToken, professorController.deletedata);
 router.post('/add-professor',  professorController.creatdata);
@@ -18,5 +18,7 @@ router.post('/insert-qulificationbyidpro',verifyToken,professorController.insert
 router.post('/insert-skillbypro',verifyToken,professorController.insertskill);
 router.post('/del-studtbyidpro',verifyToken,professorController.deletequalificationbyid);
 router.post('/del-skillbyidpro',verifyToken,professorController.deleteskillbyid);
+router.post('/getskilllistbyidskill', professorController.getskilllistbyidskill);
+
 
 export default router;

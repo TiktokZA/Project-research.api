@@ -48,10 +48,11 @@ class researchController {
     }
     static insertresearchbyidpro = async function (req, res, next) {
         const { userID } = req.user;
+
         let date_update = new Date(Date.now());
         let id_research;
         console.log(userID);
-        const { name_re , authors , Pu_date ,conference, Publisher, ID_Type, Description ,link } = req.body;
+        const { name_re , authors , Pu_date ,conference, Publisher, ID_Type, Description ,link ,Idpro} = req.body;
         let date_public = new Date(Pu_date);
         const form_data ={
             name_research:name_re,
@@ -59,7 +60,7 @@ class researchController {
             conference:conference,
             Description:Description,
             Link:link,
-            ID_professor:userID,
+            ID_professor:Idpro ? Idpro:userID,
             Publisher: Publisher,
             ID_Type:parseInt(ID_Type), 
             Citation: 0,

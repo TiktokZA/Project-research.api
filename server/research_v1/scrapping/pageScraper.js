@@ -1,6 +1,7 @@
 
 import db from "../db/DBcon.js";
-
+import dotenv from 'dotenv';
+dotenv.config();
 
 const scraperObject = {
 
@@ -112,7 +113,9 @@ const scraperObject = {
                 await dataresearch.push({ professor : keyword ,data :null,Skill : null});
                 console.log({ masage : "Download Data Faile!!!" , length: datalist.length});
             }
+            
             await page.close();
+            
             // console.log({ data : dataresearch , length: datalist.length});
         }
         // await browser.close();
@@ -226,7 +229,7 @@ const scraperObject = {
 
         });
         
-
+        return dataresearch;
 	},
     async scrapScopus(browser, keyword){
         let dataresearch=[];

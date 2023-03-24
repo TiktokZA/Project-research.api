@@ -5,6 +5,10 @@ import authService from "../services/auth.js";
 import bcrypt from 'bcryptjs';
 // import expressValidator from "express-validator";/
 import {  validationResult } from "express-validator";
+import nodeMailer from "nodemailer";
+import dotenv from 'dotenv';
+import generator from 'generate-password';
+dotenv.config();
 
 
 // const { validationResult } = expressValidator;
@@ -44,6 +48,47 @@ class AuthController {
             }
         });
     }
+    static proLogin1 = async  function (req, res, next){
+        const {email , password} =req.body;
+
+        if( !(email && password)){
+            res.status(400).send("All input is required");
+        }
+        db.query(`SELECT * FROM professor WHERE Email = "${email}"`,async (error, results) => {
+            if (error)
+                throw error;
+            if (results === undefined || results.length == 0) {
+                return res.status(401).send({
+                    msg: 'Email not found'
+                });
+            }
+            bcrypt.compare(
+                password,
+                results[0].Password,
+                async (bErr, bResult) => {
+                  // wrong password
+                  if (bErr) {
+                    throw bErr;
+                    
+                  }
+                  if (bResult) {
+                    const userID= results[0].ID_professor;
+                    const accessToken = await authService.getToken( {userID , username: email ,Role:"Professor" } );
+                    
+                    return res.status(200).send({
+                      msg: `You are logged in!`,
+                      accessToken,
+                      user: results[0],
+                      Role:"Professor"
+                    });
+                  }
+                  return res.status(401).send({
+                    msg: 'Email or password is incorrect!'
+                  });
+                }
+            );
+        });
+    }
 
     static adminLogin = async  function (req, res, next){
         const {username , password} =req.body;
@@ -56,7 +101,7 @@ class AuthController {
                 throw error;
             if (results === undefined || results.length == 0) {
                 return res.status(401).send({
-                    msg: 'username not found'
+                    msg: 'Username or password is incorrect!'
                 });
             }
             if(password == results[0].password){
@@ -90,7 +135,7 @@ class AuthController {
                 throw error;
             if (results === undefined || results.length == 0) {
                 return res.status(401).send({
-                    msg: 'username not found'
+                    msg: 'Username or password is incorrect!'
                 });
             }
             bcrypt.compare(
@@ -173,26 +218,51 @@ class AuthController {
         next();
     }
     static resetpassword = async function (req, res, next) {
-        const { username, oldpassword, newpassword }= req.body;
-
+        const { email }= req.body;
         db.query(
-            `SELECT * FROM users WHERE username = "${username}"; `,
-            (err, results) =>{
+            `SELECT * FROM professor WHERE Email = "${email}"; `,
+            async (err, results) =>{
                 if(err) throw err;
                 if(results.length == 0 || ! results ){
                     return res.status(409).send({
                         msg: 'not have this User !!'
                     });
                 }else{
-                    const respwd = bcrypt.compare(oldpassword, results[0].password);
-                    if(!respwd){
-                        return res.status(400).send({
-                            msg: 'password not mathch !!'
+
+                    let newpassword = generator.generate({
+                        length: 6,
+                        numbers: true
+                    });
+                    console.log("newpassword=>",newpassword);
+                    let transporter = await nodeMailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                            user: process.env.GMAIL_USER,
+                            pass: process.env.GMAIL_PASS,
+                        }
                         });
-                    }
+                    let mailOption = {
+                        from: process.env.GMAIL_USER,
+                        to: `${email}`,
+                        subject: 'You reset Password !!!',
+                        html: `Hi You got a message from 
+                        Email : ${process.env.GMAIL_USER} <br> <br> 
+
+                        Your Name : ${results[0].title_name+results[0].firstname_professor+" "+results[0].lastname_professor} <br>
+                        you want to reset password we can generate password for you. get this !!
+                        <h1 style="color:blue;">New Password : </h1><h1 style="color:red;"> ${newpassword}</h1>
+                        `,
+                    };
+                    transporter.sendMail(mailOption, function(err, data) {
+                        if (err) {
+                            console.log("Error " + err);
+                        } else {
+                            console.log("Email sent successfully");
+                        }
+                    });
                     const hashpassword = bcrypt.hashSync(newpassword, 10);
                     db.query(
-                        `UPDATE users SET password = "${hashpassword}"  WHERE username = "${username }";`,
+                        `UPDATE professor SET password = "${hashpassword}"  WHERE ID_professor = "${results[0].ID_professor }";`,
                         (error, Res) =>{
                             if (error){
                                 throw error;
@@ -208,7 +278,74 @@ class AuthController {
         );
 
     }
+    static changepassword = async function (req, res, next) {
+        const { userID } = req.user;
+        const {  oldpassword, newpassword,Idpro }= req.body;
+        db.query(
+            `SELECT * FROM professor WHERE 	ID_professor = ${Idpro? Idpro : userID}; `,
 
+            async (err, results) =>{
+                if(err) throw err;
+                if(results.length == 0 || ! results ){
+                    return res.status(409).send({
+                        msg: 'not have this User !!'
+                    });
+                }else{
+                    const match = await bcrypt.compare(oldpassword, results[0].Password);
+                    if(oldpassword != results[0].Password){
+                        if(!match){
+                            return res.status(401).send({
+                                msg: 'You Old Password Not Match!!'
+                            })
+                        }
+                    }
+
+                    let email = results[0].Email;
+                    // console.log("newpassword=>",newpassword);
+                    let transporter = await nodeMailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                            user: process.env.GMAIL_USER,
+                            pass: process.env.GMAIL_PASS,
+                        }
+                        });
+                    let mailOption = {
+                        from: process.env.GMAIL_USER,
+                        to: `wichansakai@gmail.com`,
+                        subject: 'You Change Password !!!',
+                        html: `Hi You got a message from 
+                        Email : ${process.env.GMAIL_USER} <br> <br> 
+
+                        Your Name : ${results[0].title_name+results[0].firstname_professor+" "+results[0].lastname_professor} <br>
+                        you want to change password we can set password for you. get this !!
+                        <h1 style="color:blue;">New Password : </h1><h1 style="color:red;"> ${newpassword}</h1>
+                        `,
+                    };
+                    transporter.sendMail(mailOption, function(err, data) {
+                        if (err) {
+                            console.log("Error " + err);
+                        } else {
+                            console.log("Email sent successfully");
+                        }
+                    });
+                    const hashpassword = bcrypt.hashSync(newpassword, 10);
+                    db.query(
+                        `UPDATE professor SET password = "${hashpassword}"  WHERE ID_professor = "${results[0].ID_professor }";`,
+                        (error, Res) =>{
+                            if (error){
+                                throw error;
+                            }
+                            return res.status(201).send({
+                                msg: 'Your password reset Success!!',
+                                data: Res
+                            });
+                        }
+                    );
+                }
+            }
+        );
+
+    }
 }
 
 

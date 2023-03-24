@@ -24,7 +24,26 @@ class professorController {
     static getdata = async function (req, res, next){
         const { userID } = req.user;
         // console.log(proID);
+        
         db.query(`SELECT * FROM professor WHERE ID_professor = ${userID}`
+        , (error, results, fields)=>{
+            if (error) throw error;
+            let massage = "";
+            if (results === undefined || results.length == 0){
+                massage = "professor is empty";
+            }else {
+                massage = "professor is Success";
+            }
+            // console.log(results[0].firstname_professor)
+            // return res.send(results);
+            return res.send({error: false, data: results, massage: massage});
+        }) 
+    }
+    static getdatabyadmin = async function (req, res, next){
+        // const { userID } = req.user;
+        // console.log(proID);
+        const { id } = req.body;
+        db.query(`SELECT * FROM professor WHERE ID_professor = ${id};`
         , (error, results, fields)=>{
             if (error) throw error;
             let massage = "";
@@ -45,6 +64,26 @@ class professorController {
         INNER JOIN skill ON skill.ID_professor = professor.ID_professor
         INNER JOIN core_skill ON core_skill.ID_coreskill = skill.ID_coreskill
         WHERE professor.ID_professor = ${id};`
+        , (error, results, fields)=>{
+            if (error) throw error;
+            let massage = "";
+            if (results === undefined || results.length == 0){
+                massage = "professor is empty";
+            }else {
+                massage = "professor is Success";
+            }
+            // console.log(results[0].firstname_professor)
+            // return res.send(results);
+            return res.send({error: false, data: results, massage: massage});
+        }) 
+    }
+    static getskilllistbyidskill = async function (req, res, next){
+        const { id } = req.body;
+        // console.log(proID);
+        db.query(`SELECT * FROM professor 
+        INNER JOIN skill ON skill.ID_professor = professor.ID_professor
+        INNER JOIN core_skill ON core_skill.ID_coreskill = skill.ID_coreskill
+        WHERE core_skill.ID_coreskill = ${id};`
         , (error, results, fields)=>{
             if (error) throw error;
             let massage = "";
@@ -165,26 +204,28 @@ class professorController {
         const { userID } = req.user;
         console.log(userID);
         const { coreskill_id } = req.body;
-        db.query(`DELETE FROM core_skill WHERE ID_coreskill = ${coreskill_id}`, (error, results, fields)=>{
+        db.query(`DELETE FROM skill WHERE ID_coreskill = ${coreskill_id} AND ID_professor = ${userID}`, (error, results, fields)=>{
             if (error) throw error ;
             let massage = "";
             if (results === undefined || results.length == 0){
                 massage = "delete faile";
             }else {
-                db.query(`DELETE FROM skill WHERE ID_coreskill = ${coreskill_id} AND ID_professor = ${userID} `, (error, results, fields)=>{
-                    if (error) throw error ;
-                    let massage = "";
-                    if (results === undefined || results.length == 0){
-                        massage = "delete faile";
-                    }else {
-                        massage = "delete Success";
-                    }
-                    return res.send(massage);
-                    // return res.send({error: false, data: results, massage: massage});
-                });
+                // db.query(`DELETE FROM skill WHERE ID_coreskill = ${coreskill_id} AND ID_professor = ${userID} `, (error, results, fields)=>{
+                //     if (error) throw error ;
+                //     let massage = "";
+                //     if (results === undefined || results.length == 0){
+                //         massage = "delete faile";
+                //     }else {
+                //         massage = "delete Success";
+                //     }
+                //     return res.send(massage);
+                //     // return res.send({error: false, data: results, massage: massage});
+                // });
+                massage = "delete Success";
+                // 
                 
             }
-        
+            return res.send(massage);
             // return res.send({error: false, data: results, massage: massage});
         });
         
@@ -193,7 +234,7 @@ class professorController {
         const { userID } = req.user;
         
         console.log(userID);
-        const { title, firstname, lastname, email, phone, position, keyword } = req.body;
+        const { title, firstname, lastname, email, phone, position, keyword , IDpro} = req.body;
         const form_data = {
             title_name : title,
             firstname_professor : firstname,
@@ -213,7 +254,7 @@ class professorController {
             ${position ? `Position = '${position}',`:``}
             ${keyword ? `Keyword = '${keyword}',`:``}
             update_date = now()
-        WHERE ID_professor = ${userID } ;`, 
+        WHERE ID_professor = ${IDpro? IDpro:userID } ;`, 
         async (error, results, fields)=>{
             if (error) throw error;
             let massage = "";
@@ -230,7 +271,7 @@ class professorController {
         const { userID } = req.user;
         
         console.log(userID);
-        const { qualification } = req.body;
+        const { qualification ,Idpro} = req.body;
         const form_data = {
             name_qualification : qualification
         }
@@ -247,7 +288,7 @@ class professorController {
                     }else {
                         
                         const skil_id= results.insertId;
-                        db.query(`INSERT INTO join_qulification (ID_professor, ID_qualification) VALUES ( ${userID} , ${skil_id});`,
+                        db.query(`INSERT INTO join_qulification (ID_professor, ID_qualification) VALUES ( ${Idpro? Idpro: userID} , ${skil_id});`,
                         (e,r)=>{
                             if (e) throw e;
                             else{
@@ -258,21 +299,21 @@ class professorController {
                     }
                 })
             }else{
-                db.query(`SELECT * FROM join_qulification WHERE ID_professor = ${userID} AND ID_qualification = ${result[0].ID_qualification} ;`,
+                db.query(`SELECT * FROM join_qulification WHERE ID_professor = ${Idpro ? Idpro:userID} AND ID_qualification = ${result[0].ID_qualification} ;`,
                 (er,re)=>{
                     if(er)throw er;
                     if(re.length == 0){
-                        db.query(`INSERT INTO join_qulification (ID_professor, ID_qualification) VALUES ( ${userID} , ${result[0].ID_qualification});`,
+                        db.query(`INSERT INTO join_qulification (ID_professor, ID_qualification) VALUES ( ${Idpro? Idpro:userID} , ${result[0].ID_qualification});`,
                         (e,r)=>{
                             if (e) throw e;
                             else{
                                 let massage = "ADD qualification is Success";
-                                return res.send({error: false, data: r, massage: massage});
+                                return res.send({error: false, data: result[0], massage: massage});
                             }
                         })
                     }
                     let massage = "ADD qualification is Success";
-                    return res.send({error: false, data: re, massage: massage});
+                    return res.send({error: false, data: result[0], massage: massage});
                 })
                 
             }
@@ -282,7 +323,7 @@ class professorController {
         const { userID } = req.user;
         
         console.log(userID);
-        const { skill } = req.body;
+        const { skill ,Idpro} = req.body;
         const form_data = {
             name_coreskill : skill
         }
@@ -299,7 +340,7 @@ class professorController {
                     }else {
                         
                         const skil_id= results.insertId;
-                        db.query(`INSERT INTO skill (ID_professor, ID_coreskill) VALUES ( ${userID} , ${skil_id});`,
+                        db.query(`INSERT INTO skill (ID_professor, ID_coreskill) VALUES ( ${Idpro? Idpro:userID} , ${skil_id});`,
                         (e,r)=>{
                             if (e) throw e;
                             else{
@@ -310,21 +351,23 @@ class professorController {
                     }
                 })
             }else{
-                db.query(`SELECT * FROM skill WHERE ID_professor = ${userID} AND ID_coreskill = ${result[0].ID_coreskill} ;`,
+                db.query(`SELECT * FROM skill WHERE ID_professor = ${Idpro ? Idpro:userID} AND ID_coreskill = ${result[0].ID_coreskill} ;`,
                 (er,re)=>{
                     if(er)throw er;
                     if(re.length == 0){
-                        db.query(`INSERT INTO skill (ID_professor, ID_coreskill) VALUES ( ${userID} , ${result[0].ID_coreskill});`,
+                        db.query(`INSERT INTO skill (ID_professor, ID_coreskill) VALUES ( ${Idpro ? Idpro:userID} , ${result[0].ID_coreskill});`,
                         (e,r)=>{
                             if (e) throw e;
                             else{
                                 let massage = "ADD coreskill is Success";
-                                return res.send({error: false, data: r, massage: massage});
+                                return res.send({error: false, data: result[0], massage: massage});
                             }
                         })
+                    }else{
+                        let massage = "ADD coreskill is Success";
+                        return res.send({error: false, data: result[0], massage: massage});
                     }
-                    let massage = "ADD coreskill is Success";
-                    return res.send({error: false, data: re, massage: massage});
+                    
                 })
                 
             }
