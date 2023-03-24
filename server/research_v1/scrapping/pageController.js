@@ -65,7 +65,7 @@ class Scrapcontroller {
         try{
             browser = await browserInstance;
             let data = await pageScraper.scrapScholar1(browser,keyword );
-            console.log("data=>", data.data)
+            // console.log("data=>", data.data)
             let DATA = data[0].data;
             let transporter = await nodeMailer.createTransport({
             service: 'gmail',
@@ -103,11 +103,11 @@ class Scrapcontroller {
 
             let mailOption = {
                 from: process.env.GMAIL_USER,
-                to: 'wichansakai@gmail.com ',
-                subject: 'test auto send !!!',
+                to: `${email[i]}`,
+                subject: 'auto scraping we can scraping you research',
                 html: `You got a message from 
                 Email : ${process.env.GMAIL_USER}
-                Name Keyword: ${data.keyword}
+                Name Keyword: ${keyword}<br>
                 DATA : ${message}
                 `,
             };
@@ -121,6 +121,32 @@ class Scrapcontroller {
            
         }
         catch(err){
+            let transporter = await nodeMailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.GMAIL_USER,
+                    pass: process.env.GMAIL_PASS,
+                }
+                });
+
+                let mailOption = {
+                    from: process.env.GMAIL_USER,
+                    to: `${email[i]}`,
+                    subject: 'test auto send !!!',
+                    html: `You got a message from 
+                    Email : ${process.env.GMAIL_USER}
+                    Name Keyword: ${keyword} <br><br>
+                    <h3 style="color:red;">Scraping error!!</h3>
+                    
+                    `,
+                };
+                transporter.sendMail(mailOption, function(err, data) {
+                    if (err) {
+                        console.log("Error " + err);
+                    } else {
+                        console.log("Email sent successfully");
+                    }
+                });
             console.log("Could not resolve the browser instance => ", err);
         }
         await browser.close();
@@ -129,10 +155,85 @@ class Scrapcontroller {
         let browser;
         try{
             browser = await browserInstance;
-            await pageScraper.scrapScopus(browser,keyword);
-            
+            let data = await pageScraper.scrapScopus(browser,keyword);
+            let DATA = data[0].data;
+            let transporter = await nodeMailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.GMAIL_USER,
+                pass: process.env.GMAIL_PASS,
+            }
+            });
+            let message = (
+                '<table style="border: 1px solid black;">' +
+                '<thead>' +
+                '<th> Title</th>' +
+                '<th> Publication_date </th>'  +
+                '<th> Conference&Jornal </th>'  +
+                '<th> Type </th>'  +
+                '<th> Citation </th>'  +
+                '<th> Link </th>'  +
+                '</thead>'
+            ); 
+            for(let i=0;i< DATA.length;i++) {
+                message += (
+                  '<tr>' +
+                   '<td>' + DATA[i].Title + '</td>' +
+                   '<td>' + DATA[i].Year + '</td>' +
+                   '<td>' + DATA[i].Conference + '</td>' +
+                   '<td>' + DATA[i].Type + '</td>' +
+                   '<td>' + DATA[i].Citation + '</td>' +
+                   '<td>' + DATA[i].Link + '</td>' +
+                 '</tr>'
+                );
+            }
+            message +=  '</table>';
+
+            let mailOption = {
+                from: process.env.GMAIL_USER,
+                to: `${email[i]}`,
+                subject: 'auto scraping we can scraping you research',
+                html: `You got a message from 
+                Email : ${process.env.GMAIL_USER}
+                Name Keyword: ${keyword}<br>
+                DATA : ${message}
+                `,
+            };
+            transporter.sendMail(mailOption, function(err, data) {
+                if (err) {
+                    console.log("Error " + err);
+                } else {
+                    console.log("Email sent successfully");
+                }
+            });
         }
         catch(err){
+            let transporter = await nodeMailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.GMAIL_USER,
+                    pass: process.env.GMAIL_PASS,
+                }
+                });
+
+                let mailOption = {
+                    from: process.env.GMAIL_USER,
+                    to: `${email[i]}`,
+                    subject: 'test auto send !!!',
+                    html: `You got a message from 
+                    Email : ${process.env.GMAIL_USER}
+                    Name Keyword: ${keyword} <br><br>
+                    <h3 style="color:red;">Scraping error!!</h3>
+                    
+                    `,
+                };
+                transporter.sendMail(mailOption, function(err, data) {
+                    if (err) {
+                        console.log("Error " + err);
+                    } else {
+                        console.log("Email sent successfully");
+                    }
+                });
             console.log("Could not resolve the browser instance => ", err);
         }
         await browser.close();

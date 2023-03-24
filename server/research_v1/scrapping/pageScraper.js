@@ -447,7 +447,7 @@ const scraperObject = {
                 });
 			}
         }); 
-        
+        return dataresearch;
     }
     ,async scrapCIS(browser){
         let page = await browser.newPage();
