@@ -48,10 +48,11 @@ class researchController {
     }
     static insertresearchbyidpro = async function (req, res, next) {
         const { userID } = req.user;
+
         let date_update = new Date(Date.now());
         let id_research;
         console.log(userID);
-        const { name_re , authors , Pu_date ,conference, Publisher, ID_Type, Description ,link } = req.body;
+        const { name_re , authors , Pu_date ,conference, Publisher, ID_Type, Description ,link ,Idpro} = req.body;
         let date_public = new Date(Pu_date);
         const form_data ={
             name_research:name_re,
@@ -59,7 +60,7 @@ class researchController {
             conference:conference,
             Description:Description,
             Link:link,
-            ID_professor:userID,
+            ID_professor:Idpro ? Idpro:userID,
             Publisher: Publisher,
             ID_Type:parseInt(ID_Type), 
             Citation: 0,
@@ -138,26 +139,54 @@ class researchController {
     }
     static getresearchbypro = async (req, res, next)=>{
         const {id} =req.body;
-        let strsql = `SELECT *FROM research 
-        INNER JOIN professor ON research.ID_professor = professor.ID_professor
-        INNER JOIN type_research ON research.ID_Type = type_research.ID_Type
-        WHERE research.ID_professor = ${id} AND research.status != "invalid"
-        ORDER BY research.Publication_date
-        ;`
-        db.query(strsql , (error , result) =>{
+
+        db.query(`SELECT * FROM professor WHERE ID_professor = ${id};` , (error, result)=>{
             if(error) throw error;
-            if(result.length == 0){
-                return res.status(404).send({
-                    message : "Searching not found",
-                    data :null
-                })
-            }else{
-                return res.status(200).send({
-                    message : "Searching is found",
-                    data : result
+            if(result.length > 0){
+                let keyword = result[0].Keyword;
+                let strsql = `SELECT *FROM research 
+                    INNER JOIN professor ON research.ID_professor = professor.ID_professor
+                    INNER JOIN type_research ON research.ID_Type = type_research.ID_Type
+                    WHERE research.ID_professor = ${id} OR research.authors LIKE '%${keyword}%' AND research.status != "invalid"
+                    ORDER BY research.Publication_date
+                ;`
+                db.query(strsql , (err,re)=>{
+                    if(err) throw err;
+                    if(re.length == 0){
+                        return res.status(404).send({
+                            message : "Searching not found",
+                            data :null
+                        })
+                    }else{
+                        return res.status(200).send({
+                            message : "Searching is found",
+                            data : re
+                        })
+                    }
                 })
             }
-        });
+        })
+
+        // let strsql = `SELECT *FROM research 
+        // INNER JOIN professor ON research.ID_professor = professor.ID_professor
+        // INNER JOIN type_research ON research.ID_Type = type_research.ID_Type
+        // WHERE research.ID_professor = ${id} AND research.status != "invalid"
+        // ORDER BY research.Publication_date
+        // ;`
+        // db.query(strsql , (error , result) =>{
+        //     if(error) throw error;
+        //     if(result.length == 0){
+        //         return res.status(404).send({
+        //             message : "Searching not found",
+        //             data :null
+        //         })
+        //     }else{
+        //         return res.status(200).send({
+        //             message : "Searching is found",
+        //             data : result
+        //         })
+        //     }
+        // });
     }
     static getresearchbyidpro = async (req, res, next)=>{
         const {id} =req.body;

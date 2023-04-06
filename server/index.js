@@ -3,14 +3,14 @@ import path from "path";
 import router from "./research_v1/routes/index.js";
 import db from "./research_v1/db/DBcon.js";
 import dotenv from 'dotenv';
-
+import nodeMailer from "nodemailer";
 import AutoScrap from "./research_v1/scrapping/index.js";
 import cors from "cors";
 
 dotenv.config();
 const app = express();
 
-const PORT = process.env.API_PORT || 4000 ;
+const PORT = process.env.API_PORT || 8000 ;
 
 
 // app.use((req ,res ,next)=>{
@@ -60,8 +60,29 @@ app.get('/' ,(req, res)=> {
 })
 
 app.use(router);
-
-
+// let transporter = await nodeMailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//       user: process.env.GMAIL_USER,
+//       pass: process.env.GMAIL_PASS,
+//     }
+// });
+// let mailOption = {
+//     from: process.env.GMAIL_USER,
+//     to: 'wichansakai@gmail.com , sutita.bowwy@gmail.com',
+//     subject: 'test auto send !!!',
+//     html: `You got a message from 
+//     Email : ${process.env.GMAIL_USER}
+//     Name: AAAAAA
+//     Message: dwadwadwa`,
+//   };
+// transporter.sendMail(mailOption, function(err, data) {
+// if (err) {
+//     console.log("Error " + err);
+// } else {
+//     console.log("Email sent successfully");
+// }
+// });
 
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`);
