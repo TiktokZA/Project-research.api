@@ -127,7 +127,7 @@ export function gettimescrap() {
 export default AutoScrap;
 
 // let browserInstance1 = browserObject.startBrowser();
-// let i=13;
+// let i=1;
 // const keyword = Scrapcontroller.keyword;
 // await Scrapcontroller.scrapeScholar(browserInstance1, keyword[i] ,i);
 // let browserInstance2 = browserObject.startBrowser();

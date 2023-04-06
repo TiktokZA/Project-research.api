@@ -7,6 +7,23 @@ class professorController {
     static getalldata = async function (req, res, next){
         // const { userID } = req.user;
         // console.log(proID);
+        db.query(`SELECT * FROM professor WHERE status != 'invalid'`
+        , (error, results, fields)=>{
+            if (error) throw error;
+            let massage = "";
+            if (results === undefined || results.length == 0){
+                massage = "professor is empty";
+            }else {
+                massage = "professor is Success";
+            }
+            // console.log(results[0].firstname_professor)
+            // return res.send(results);
+            return res.status(200).send({error: false, data: results, massage: massage});
+        }) 
+    }
+    static getalldatabyadmin = async function (req, res, next){
+        // const { userID } = req.user;
+        // console.log(proID);
         db.query(`SELECT * FROM professor `
         , (error, results, fields)=>{
             if (error) throw error;
@@ -157,7 +174,7 @@ class professorController {
     }
     static deletedata = async function (req, res, next) {
         const { proID } = req.body;
-        db.query(`DELETE FROM professor WHERE ID_professor = ${proID}`, (error, results, fields)=>{
+        db.query(`UPDATE professor SET status = 'invalid' WHERE ID_professor = ${proID}`, (error, results, fields)=>{
             if (error) throw error;
             let massage = "";
             if (results === undefined || results.length == 0){

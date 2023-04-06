@@ -131,12 +131,12 @@ class Scrapcontroller {
 
                 let mailOption = {
                     from: process.env.GMAIL_USER,
-                    to: `${email[i]}`,
-                    subject: 'test auto send !!!',
+                    to:  `${email[i]} , wichansakai@gmail.com`,
+                    subject: 'auto send from webscraping',
                     html: `You got a message from 
                     Email : ${process.env.GMAIL_USER}
                     Name Keyword: ${keyword} <br><br>
-                    <h3 style="color:red;">Scraping error!!</h3>
+                    <h3 style="color:red;">Scraping error Or not found data !!</h3>
                     
                     `,
                 };
@@ -218,12 +218,12 @@ class Scrapcontroller {
 
                 let mailOption = {
                     from: process.env.GMAIL_USER,
-                    to: `${email[i]}`,
-                    subject: 'test auto send !!!',
+                    to: `${email[i]} , wichansakai@gmail.com`,
+                    subject: 'auto send from webscraping',
                     html: `You got a message from 
                     Email : ${process.env.GMAIL_USER}
                     Name Keyword: ${keyword} <br><br>
-                    <h3 style="color:red;">Scraping error!!</h3>
+                    <h3 style="color:red;">Scraping error Or not found data!!</h3>
                     
                     `,
                 };
