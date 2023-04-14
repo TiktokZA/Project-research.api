@@ -6,10 +6,15 @@ import verifyToken from "../../../../middleware/auth.js";
 const { Router } = express;
 const router = Router({ mergeParams: true });
 
-router.get('/get-data', adminController.getlistadmin);
-router.post('/settime',verifyToken, adminController.settimescrap);
-router.get('/get-timescrap',verifyToken,adminController.gettimescrap)
-router.get('/get-databyid',verifyToken ,adminController.getdataadmin);
+try {
+    router.get('/get-data', adminController.getlistadmin);
+    router.post('/settime',verifyToken, adminController.settimescrap);
+    router.get('/get-timescrap',verifyToken,adminController.gettimescrap)
+    router.get('/get-databyid',verifyToken ,adminController.getdataadmin);
+} catch (error) {
+    console.log(error)
+}
+
 
 
 router.post('/welcome' , verifyToken , (req,res)=> {
