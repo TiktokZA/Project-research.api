@@ -8,6 +8,9 @@ const scraperObject = {
 	url: ['https://scholar.google.com/','https://www.scopus.com/search/form.uri?zone=TopNavBar&origin=AuthorProfile&display=basic#author','http://cs.kmutnb.ac.th/administrator.jsp'],
 	async scrapScholar1(browser,keyword){
         let dataresearch=[];
+        try {
+            
+        
         let page = await browser.newPage();
         console.log(`Navigating to ${this.url[0]}...`);
         console.log(`Professor to ${ keyword}...`);
@@ -18,7 +21,7 @@ const scraperObject = {
         /// check location scrap
         if(! await page.$("#gs_res_ccl_mid > div:nth-child(1) > table > tbody > tr > td:nth-child(2) > h4 > a > b")) {
             console.log({ masage : "Download Data Faile!!!" , length: null});
-            await dataresearch.push({ professor :keyword ,data :null ,Skill : null});
+            await dataresearch.push({ professor :keyword ,data :[] ,Skill : []});
             await page.close();
         }else{
             await page.click('#gs_res_ccl_mid > div:nth-child(1) > table > tbody > tr > td:nth-child(2) > h4 > a > b');
@@ -229,10 +232,17 @@ const scraperObject = {
 
         });
         
+        
+        } catch (error) {
+                console.log(error)
+        }
         return dataresearch;
 	},
     async scrapScopus(browser, keyword){
         let dataresearch=[];
+        try {
+            
+        
         let page = await browser.newPage();
         console.log(`Navigating to ${this.url[1]}...`);
         console.log(`Professor to ${keyword}...`);
@@ -241,13 +251,13 @@ const scraperObject = {
         const lastname =nameArray[1];
         const firstname =nameArray[0];
         await page.type('#scopus-author-search-form > div:nth-child(2) > div:nth-child(1) > els-input > div > label > input', lastname);
-        page.type('#scopus-author-search-form > div:nth-child(2) > div:nth-child(2) > els-input > div > label > input', firstname);
+        await page.type('#scopus-author-search-form > div:nth-child(2) > div:nth-child(2) > els-input > div > label > input', firstname);
         await page.keyboard.press('Enter');
         await page.waitForNavigation();
     
         if(! await page.$('#resultDataRow1 > td > a')){
             console.log({ masage : "Data for this Professor is not found..." , length: null});
-            await dataresearch.push({ professor :keyword ,data :null,  Skill : null});
+            await dataresearch.push({ professor :keyword ,data :[],  Skill : []});
             await page.close();
         }else{
             await page.click('#resultDataRow1 > td > a');
@@ -447,6 +457,9 @@ const scraperObject = {
                 });
 			}
         }); 
+        } catch (error) {
+                console.log(error);
+        }
         return dataresearch;
     }
     ,async scrapCIS(browser){

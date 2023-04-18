@@ -60,7 +60,7 @@ class Scrapcontroller {
         'nattagit.j@sci.kmutnb.ac.th',
         'apisit.r@sci.kmutnb.ac.th'
     ];
-    static scrapeScholar = async function (browserInstance , keyword , i){
+    static scrapeScholar = async function (browserInstance , keyword , email){
         let browser;
         try{
             browser = await browserInstance;
@@ -103,7 +103,7 @@ class Scrapcontroller {
 
             let mailOption = {
                 from: process.env.GMAIL_USER,
-                to: `${email[i]}`,
+                to: `${email}`,
                 subject: 'auto scraping we can scraping you research',
                 html: `You got a message from 
                 Email : ${process.env.GMAIL_USER}
@@ -131,7 +131,7 @@ class Scrapcontroller {
 
                 let mailOption = {
                     from: process.env.GMAIL_USER,
-                    to:  `${email[i]} , wichansakai@gmail.com`,
+                    to:  `${email} , wichansakai@gmail.com`,
                     subject: 'auto send from webscraping',
                     html: `You got a message from 
                     Email : ${process.env.GMAIL_USER}
@@ -151,7 +151,7 @@ class Scrapcontroller {
         }
         await browser.close();
     }
-    static scrapeScopus = async function (browserInstance , keyword){
+    static scrapeScopus = async function (browserInstance , keyword, email){
         let browser;
         try{
             browser = await browserInstance;
@@ -191,7 +191,7 @@ class Scrapcontroller {
 
             let mailOption = {
                 from: process.env.GMAIL_USER,
-                to: `${email[i]}`,
+                to: `${email}`,
                 subject: 'auto scraping we can scraping you research',
                 html: `You got a message from 
                 Email : ${process.env.GMAIL_USER}
@@ -218,7 +218,7 @@ class Scrapcontroller {
 
                 let mailOption = {
                     from: process.env.GMAIL_USER,
-                    to: `${email[i]} , wichansakai@gmail.com`,
+                    to: `${email} , wichansakai@gmail.com`,
                     subject: 'auto send from webscraping',
                     html: `You got a message from 
                     Email : ${process.env.GMAIL_USER}

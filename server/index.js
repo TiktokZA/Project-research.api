@@ -9,10 +9,7 @@ import cors from "cors";
 
 dotenv.config();
 const app = express();
-
 const PORT = process.env.API_PORT || 8000 ;
-
-
 // app.use((req ,res ,next)=>{
 //     res.header('Access-Control-Allow-Origin', '*');
 //     res.header('Access-Control-Allow-Headers', 'Origin , X-Requested-With, Content-Type, Accept');
@@ -31,8 +28,7 @@ app.use(
     })
 );
 app.use(cors())
-
-let i=0;
+// let i=0;
 // cron.schedule("0 */1 * * * *", () =>{
 //     console.log("Layer 1---------------------");
 //     ;
@@ -58,7 +54,6 @@ app.get('/' ,(req, res)=> {
         written_by: 'Wichan'
     })
 })
-
 app.use(router);
 // let transporter = await nodeMailer.createTransport({
 //     service: 'gmail',
@@ -87,8 +82,6 @@ app.use(router);
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`);
 })
-
-
 AutoScrap.Timescrap(4);
 
 export default app;
