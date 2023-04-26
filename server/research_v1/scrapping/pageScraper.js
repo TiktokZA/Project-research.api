@@ -240,9 +240,7 @@ const scraperObject = {
 	},
     async scrapScopus(browser, keyword){
         let dataresearch=[];
-        try {
-            
-        
+        try { 
         let page = await browser.newPage();
         console.log(`Navigating to ${this.url[1]}...`);
         console.log(`Professor to ${keyword}...`);
@@ -328,7 +326,7 @@ const scraperObject = {
                 };
 
                 console.log(`Downloading data ${i+1}......`);
-                // console.log(form)
+                console.log(form)
                 await data.push(form);
                 } catch (error) {
                      console.log("Leyer Scraping => ", error)   
@@ -336,15 +334,28 @@ const scraperObject = {
             }
 
 
-           
+            let data_skills ;
             await page.click("#AuthorHeader__showAllAuthorInfo");
-            await page.waitForSelector(`.background_cfa738 > div > div > div >div >div > div:nth-child(4) >div >span`);
-            const data_skills =await page.evaluate( async () =>{
-                const elements = await document.querySelector(`.background_cfa738 > div > div > div >div >div > div:nth-child(4) >div >span`).textContent;
-                const data =elements.split(" • ");
-                console.log("data skill =>", elements);
-                return data;
-            });
+            if( await page.$(`#scopus-author-profile-page-control-microui__general-information-content > div:nth-child(1) > ul > li:nth-child(5) > div > div > div > div > div > div > div:nth-child(4) > div > span`)){
+                await page.waitForSelector(`#scopus-author-profile-page-control-microui__general-information-content > div:nth-child(1) > ul > li:nth-child(5) > div > div > div > div > div > div > div:nth-child(4) > div > span`);
+                data_skills =await page.evaluate( async () =>{
+                    const elements = await document.querySelector(`#scopus-author-profile-page-control-microui__general-information-content > div:nth-child(1) > ul > li:nth-child(5) > div > div > div > div > div > div > div:nth-child(4) > div > span`).textContent;
+                    const data =elements.split(" • ");
+                    console.log("data skill =>", elements);
+                    return data;
+                });
+            }else if( await page.$(`#scopus-author-profile-page-control-microui__general-information-content > div:nth-child(1) > ul > li:nth-child(4) > div > div > div > div > div > div > div:nth-child(4) > div > span`)){
+                await page.waitForSelector(`#scopus-author-profile-page-control-microui__general-information-content > div:nth-child(1) > ul > li:nth-child(4) > div > div > div > div > div > div > div:nth-child(4) > div > span`);
+                data_skills =await page.evaluate( async () =>{
+                    const elements = await document.querySelector(`#scopus-author-profile-page-control-microui__general-information-content > div:nth-child(1) > ul > li:nth-child(4) > div > div > div > div > div > div > div:nth-child(4) > div > span`).textContent;
+                    const data =elements.split(" • ");
+                    console.log("data skill =>", elements);
+                    return data;
+                });
+            }
+            
+            console.log(`Downloading data data_skills ......`);
+            console.log(data_skills)
             if(data || data_skills){
                 await dataresearch.push({ professor : keyword,data :data, Skill : data_skills})
                 console.log({ masage : "Download Data Success!!!" , data_length: data.length, skill_length: data_skills.length});
@@ -369,17 +380,17 @@ const scraperObject = {
                 const form_data ={
                     name_research:dataresearch[0].data[i].Title,
                     Publication_date:date_public,
-                    conference:dataresearch[0].data[i].Conference,
+                    conference: dataresearch[0].data[i].Type == 'Conference Paper' ? 'Conference'+dataresearch[0].data[i].Conference : 'Journal'+dataresearch[0].data[i].Conference,
                     Description:dataresearch[0].data[i].Abstact,
                     Link:dataresearch[0].data[i].Link,
                     ID_professor:ID,
-                    Publisher:dataresearch[0].data[i].Type,
+                    Publisher:"Scopus",
                     ID_Type:2, 
                     Citation:dataresearch[0].data[i].Citation,
                     Date_Update:dateFormat,
                     status : "valid"
                 }
-                await db.query(`SELECT * FROM research WHERE name_research = '${dataresearch[0].data[i].Title}' AND ID_Type = 2;`,
+                await db.query(`SELECT * FROM research WHERE name_research = "${dataresearch[0].data[i].Title}" AND ID_Type = 2;`,
                 async (err, res) =>{
                     if (err) throw err;
                     if(res.length == 0 ){
@@ -413,11 +424,274 @@ const scraperObject = {
             console.log("Core Skill length => ",dataresearch[0].Skill.length)
 			for(let i =0 ;i < dataresearch[0].Skill.length;i++){
                 
-                await db.query(`SELECT * FROM core_skill WHERE name_coreskill = '${dataresearch[0].Skill[i]}';`,
+                await db.query(`SELECT * FROM core_skill WHERE name_coreskill = "${dataresearch[0].Skill[i]}";`,
                 async (err, res) =>{
                     if (err) throw err;
                     if(res.length == 0 ){
-                        await db.query(`INSERT INTO core_skill (name_coreskill) VALUES ('${dataresearch[0].Skill[i]}');`,
+                        await db.query(`INSERT INTO core_skill (name_coreskill) VALUES ("${dataresearch[0].Skill[i]}");`,
+                        async (err, result)=>{
+                            if (err) {
+                                console.log(err);
+                            }else{
+                                const skil_id= result.insertId;
+                                const sql =`INSERT INTO skill (ID_coreskill, ID_professor) VALUES (${skil_id}, ${ID});`;
+                                await db.query(sql, (e,r)=>{
+                                    if(e) {
+                                        console.log(e);
+                                    }else{
+                                        console.log(`Insert data skill No.${i+1} Success!!`);
+                                        console.log(r);
+                                    }
+                                });
+                                // console.log(`Insert data Core skill ${i}  Success!!`);
+                                // console.log(result);
+                            }
+                        });
+                    }else{
+                        const skil_id = res[0].ID_coreskill;
+                        await db.query(`SELECT * FROM skill WHERE ID_coreskill= ${skil_id} AND ID_professor=  ${ID};`,async (e,r)=>{
+                            if(e) throw e;
+                            if(r.length == 0){
+                                const sql =`INSERT INTO skill (ID_coreskill, ID_professor) VALUES (${skil_id}, ${ID});`;
+                                await db.query(sql,
+                                (err, result)=>{
+                                        if (err) {
+                                            console.log(err);
+                                        }else{
+                                            console.log(`Insert data skill No.${i+1} Success!!`);
+                                            console.log(result);
+                                        }
+                                });
+                            }
+                        });
+                    }
+                });
+			}
+        }); 
+        } catch (error) {
+                console.log(error);
+        }
+        return dataresearch;
+    },
+    async scrapScopus1(browser, keyword){
+        let dataresearch=[];
+        try { 
+        let page = await browser.newPage();
+        console.log(`Navigating to ${this.url[1]}...`);
+        console.log(`Professor to ${keyword}...`);
+        await page.goto(this.url[1]);
+        const nameArray = keyword.split(" ");
+        const lastname =nameArray[1];
+        const firstname =nameArray[0];
+        await page.type('#scopus-author-search-form > div:nth-child(2) > div:nth-child(1) > els-input > div > label > input', lastname);
+        await page.type('#scopus-author-search-form > div:nth-child(2) > div:nth-child(2) > els-input > div > label > input', firstname);
+        await page.keyboard.press('Enter');
+        await page.waitForNavigation();
+    
+        if(! await page.$('#resultDataRow1 > td > a')){
+            console.log({ masage : "Data for this Professor is not found..." , length: null});
+            await dataresearch.push({ professor :keyword ,data :[],  Skill : []});
+            await page.close();
+        }else{
+            await page.click('#resultDataRow1 > td > a');
+            console.log("page loaded....");
+            await page.waitForTimeout(1000);
+            if( await page.$('#pendo-guide-container')){
+                await page.waitForSelector('#pendo-guide-container')
+                await page.click('button#pendo-close-guide-32945519._pendo-close-guide');
+            }
+            await page.waitForSelector('#documents-panel > div > div > div:nth-child(2) > div > els-results-layout > els-paginator > nav > els-select > div > label');
+            await page.select('els-results-layout > els-paginator > nav > els-select > div > label > select', "200");
+            // await page.select('els-results-layout > els-paginator > nav > els-select > div > label > select', "200");
+            await page.waitForTimeout(2000);
+            let selector = '.collapsible-panel__button.button--link';
+            await page.$$eval(selector, anchors => {
+                anchors.map(anchor => {
+                    if(anchor.textContent == 'Show abstract') {
+                        anchor.click();
+                        return
+                    }
+                })
+            });
+            const reviewElements = await page.$$(".results-list-item");
+            console.log("Download length => ",reviewElements.length);
+            const data= [];
+            for(let i =0;i<reviewElements.length;i++){
+                await page.waitForTimeout(1000);
+                try {
+                     
+                const Title = await reviewElements[i].$eval(
+                    '.row > div:nth-child(1) > div > h4',
+                    (v)=> v.textContent
+                );
+                const Link = await reviewElements[i].$eval(
+                    '.row > div:nth-child(1) > div > h4 > a',
+                    (v)=> v.href
+                );
+                let Year = await reviewElements[i].$eval(
+                    '.row > div:nth-child(1) > .text-meta.text-width-34 > span:nth-child(2)',
+                    (v)=> v.textContent
+                );
+                Year = Year.split(",");
+                const Abstact = await reviewElements[i].$eval(
+                    '.row > div:nth-child(1) > .hydrated > section',
+                    (v)=> v.textContent
+                );
+                const Citation = await reviewElements[i].$eval(
+                    '.row > div:nth-child(2) > div > div > div > div:nth-child(1)',
+                    (v) => v.textContent
+                );
+                let page1 = await browser.newPage();
+                await page1.goto(Link);
+                
+                await page1.waitForSelector('#doc-details-page-container > article > div:nth-child(2) > section > div:nth-child(2) > div > ul >li > button');
+                await page1.waitForTimeout(1000);
+                const data1 = await page1.evaluate( async () =>{
+                    let Conference= "" ;
+                    let type ="";
+                    let author="";
+                    let publisher = "";
+                    try {
+                        type = await document.querySelector("#source-info-aside > div > div > div > dl:nth-child(2) > dd").textContent;
+                        let w = await document.querySelector("#source-preview-flyout > span > strong > em").textContent;
+                        Conference = type+" "+w; 
+                        publisher = await document.querySelector("#source-info-aside > div > div > div > els-collapsible-panel > section > div > div > dl:nth-child(1) > dd").textContent;
+                        const elementsf = await document.querySelectorAll("#doc-details-page-container > article > div:nth-child(2) > section > div:nth-child(2) > div > ul >li > button");
+                        for(let i=0 ; i < elementsf.length; i++ ){ 
+                            let name =await elementsf[i].textContent;
+                            console.log("name => ",name)
+                            let arr=name.split(", ");
+                            author= author+ arr[1]+" "+arr[0]+", ";
+                        }
+
+                        // author = author.split(", ");
+                    } catch (error) {
+                        console.log(`this data `+error);
+                    }
+                    return {
+                        Conference: Conference,
+                        Type : type,
+                        Author :author,
+                        Publisher : publisher
+                    };
+                });
+                await page1.close();
+                const form ={
+                        Type: data1.Type ? data1.Type:"-",
+                        Title :Title? Title: "-",
+                        Year: Year[0] ? Year[0]: '-',
+                        Conference : data1.Conference ? data1.Conference : "-",
+                        Abstact : Abstact ? Abstact : "-",
+                        Link: Link ? Link :"-",
+                        Citation : Citation ?  Citation : 0,
+                        Author : data1.Author ? data1.Author :"-",
+                        Publisher : data1.Publisher ? data1.Publisher:"-"
+                };
+
+                console.log(`Downloading data ${i+1}......`);
+                console.log(form)
+                await data.push(form);
+                } catch (error) {
+                     console.log("Leyer Scraping => ", error)   
+                }
+            }
+
+
+            let data_skills ;
+            await page.click("#AuthorHeader__showAllAuthorInfo");
+            if( await page.$(`#scopus-author-profile-page-control-microui__general-information-content > div:nth-child(1) > ul > li:nth-child(5) > div > div > div > div > div > div > div:nth-child(4) > div > span`)){
+                await page.waitForSelector(`#scopus-author-profile-page-control-microui__general-information-content > div:nth-child(1) > ul > li:nth-child(5) > div > div > div > div > div > div > div:nth-child(4) > div > span`);
+                data_skills =await page.evaluate( async () =>{
+                    const elements = await document.querySelector(`#scopus-author-profile-page-control-microui__general-information-content > div:nth-child(1) > ul > li:nth-child(5) > div > div > div > div > div > div > div:nth-child(4) > div > span`).textContent;
+                    const data =elements.split(" • ");
+                    console.log("data skill =>", elements);
+                    return data;
+                });
+            }else if( await page.$(`#scopus-author-profile-page-control-microui__general-information-content > div:nth-child(1) > ul > li:nth-child(4) > div > div > div > div > div > div > div:nth-child(4) > div > span`)){
+                await page.waitForSelector(`#scopus-author-profile-page-control-microui__general-information-content > div:nth-child(1) > ul > li:nth-child(4) > div > div > div > div > div > div > div:nth-child(4) > div > span`);
+                data_skills =await page.evaluate( async () =>{
+                    const elements = await document.querySelector(`#scopus-author-profile-page-control-microui__general-information-content > div:nth-child(1) > ul > li:nth-child(4) > div > div > div > div > div > div > div:nth-child(4) > div > span`).textContent;
+                    const data =elements.split(" • ");
+                    console.log("data skill =>", elements);
+                    return data;
+                });
+            }
+            
+            console.log(`Downloading data data_skills ......`);
+            console.log(data_skills)
+            if(data || data_skills){
+                await dataresearch.push({ professor : keyword,data :data, Skill : data_skills})
+                console.log({ masage : "Download Data Success!!!" , data_length: data.length, skill_length: data_skills.length});
+            }
+            else{
+                await dataresearch.push({ professor : keyword ,data :null,  Skill : null});
+                console.log({ masage : "Download Data Faile!!!" , length: data.length});
+            }
+
+        }
+        // await browser.close();
+        console.log({ masage : "Download Data for professor Success!!!" , length: dataresearch[0].data.length ,skill_length:  dataresearch[0].Skill.length});
+
+        let res;
+		await db.query(`SELECT * FROM professor WHERE Keyword = '${dataresearch[0].professor}' ;`
+        ,async (error, results, fields)=>{
+            if (error) throw error;
+            let ID = results[0].ID_professor;
+			for(let i =0 ;i < dataresearch[0].data.length;i++){
+                let dateFormat = new Date(Date.now());
+                let date_public = new Date(dataresearch[0].data[i].Year);
+                const form_data ={
+                    name_research:dataresearch[0].data[i].Title,
+                    Publication_date:date_public,
+                    conference: dataresearch[0].data[i].Conference,
+                    Description:dataresearch[0].data[i].Abstact,
+                    Link:dataresearch[0].data[i].Link,
+                    ID_professor:ID,
+                    Publisher:dataresearch[0].data[i].Publisher,
+                    ID_Type:2, 
+                    Citation:dataresearch[0].data[i].Citation,
+                    Date_Update:dateFormat,
+                    status : "valid"
+                }
+                await db.query(`SELECT * FROM research WHERE name_research = "${dataresearch[0].data[i].Title}" AND ID_Type = 2;`,
+                async (err, res) =>{
+                    if (err) throw err;
+                    if(res.length == 0 ){
+                        await db.query(`INSERT INTO research SET ?;`,
+                        form_data,
+                        (err, result)=>{
+                            if (err) {
+                                console.log(err);
+                            }else{
+                                res = result;
+                                console.log(`Insert data Research No.${i+1} Success!!`);
+                                console.log(result);
+                            }
+                        });
+                    }else{
+                        await db.query(`UPDATE research SET ? WHERE ID_research = ${res[0].ID_research } `,
+                        form_data,
+                        (err, result)=>{
+                                if (err) {
+                                    console.log(err);
+                                }else{
+                                    res = result;
+                                    console.log(`Update data Research No.${i+1} Success!!`);
+                                    console.log(result);
+                                }
+                        });
+                    }
+                })
+
+			}
+            console.log("Core Skill length => ",dataresearch[0].Skill.length)
+			for(let i =0 ;i < dataresearch[0].Skill.length;i++){
+                
+                await db.query(`SELECT * FROM core_skill WHERE name_coreskill = "${dataresearch[0].Skill[i]}";`,
+                async (err, res) =>{
+                    if (err) throw err;
+                    if(res.length == 0 ){
+                        await db.query(`INSERT INTO core_skill (name_coreskill) VALUES ("${dataresearch[0].Skill[i]}");`,
                         async (err, result)=>{
                             if (err) {
                                 console.log(err);

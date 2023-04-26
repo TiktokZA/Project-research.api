@@ -36,7 +36,7 @@ const AutoScrap = {
         }
         job = new CronJob(strtime[indext],()=>{
             console.log("Time counting.....");
-            job1 = new CronJob("*/2 * * * *",async ()=>{
+            job1 = new CronJob("*/5 * * * *",async ()=>{
                 if(i < keyword.length){
                     let browserInstance1 = browserObject.startBrowser();
                     await Scrapcontroller.scrapeScholar(browserInstance1, keyword[i] , email[i]);
@@ -127,11 +127,12 @@ export function gettimescrap() {
 export default AutoScrap;
 
 // let browserInstance1 = browserObject.startBrowser();
-// let i=1;
+// let i=10;
 // const keyword = Scrapcontroller.keyword;
-// await Scrapcontroller.scrapeScholar(browserInstance1, keyword[i] ,i);
+// const email = Scrapcontroller.email;
+// // await Scrapcontroller.scrapeScholar(browserInstance1, keyword[i] ,email[i]);
 // let browserInstance2 = browserObject.startBrowser();
-// await Scrapcontroller.scrapeScopus(browserInstance2, keyword[i]);
+// await Scrapcontroller.scrapeScopus(browserInstance2, keyword[i],email[i]);
 
 // let browserInstance2 = browserObject.startBrowser();
 // await Scrapcontroller.scrapeCIS(browserInstance2);

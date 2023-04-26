@@ -111,13 +111,13 @@ class Scrapcontroller {
                 DATA : ${message}
                 `,
             };
-            transporter.sendMail(mailOption, function(err, data) {
-                if (err) {
-                    console.log("Error " + err);
-                } else {
-                    console.log("Email sent successfully");
-                }
-            });
+            // transporter.sendMail(mailOption, function(err, data) {
+            //     if (err) {
+            //         console.log("Error " + err);
+            //     } else {
+            //         console.log("Email sent successfully");
+            //     }
+            // });
            
         }
         catch(err){
@@ -140,13 +140,13 @@ class Scrapcontroller {
                     
                     `,
                 };
-                transporter.sendMail(mailOption, function(err, data) {
-                    if (err) {
-                        console.log("Error " + err);
-                    } else {
-                        console.log("Email sent successfully");
-                    }
-                });
+                // transporter.sendMail(mailOption, function(err, data) {
+                //     if (err) {
+                //         console.log("Error " + err);
+                //     } else {
+                //         console.log("Email sent successfully");
+                //     }
+                // });
             console.log("Could not resolve the browser instance => ", err);
         }
         await browser.close();
@@ -155,7 +155,7 @@ class Scrapcontroller {
         let browser;
         try{
             browser = await browserInstance;
-            let data = await pageScraper.scrapScopus(browser,keyword);
+            let data = await pageScraper.scrapScopus1(browser,keyword);
             let DATA = data[0].data;
             let transporter = await nodeMailer.createTransport({
             service: 'gmail',
@@ -199,13 +199,13 @@ class Scrapcontroller {
                 DATA : ${message}
                 `,
             };
-            transporter.sendMail(mailOption, function(err, data) {
-                if (err) {
-                    console.log("Error " + err);
-                } else {
-                    console.log("Email sent successfully");
-                }
-            });
+            // transporter.sendMail(mailOption, function(err, data) {
+            //     if (err) {
+            //         console.log("Error " + err);
+            //     } else {
+            //         console.log("Email sent successfully");
+            //     }
+            // });
         }
         catch(err){
             let transporter = await nodeMailer.createTransport({
@@ -227,13 +227,13 @@ class Scrapcontroller {
                     
                     `,
                 };
-                transporter.sendMail(mailOption, function(err, data) {
-                    if (err) {
-                        console.log("Error " + err);
-                    } else {
-                        console.log("Email sent successfully");
-                    }
-                });
+                // transporter.sendMail(mailOption, function(err, data) {
+                //     if (err) {
+                //         console.log("Error " + err);
+                //     } else {
+                //         console.log("Email sent successfully");
+                //     }
+                // });
             console.log("Could not resolve the browser instance => ", err);
         }
         await browser.close();
